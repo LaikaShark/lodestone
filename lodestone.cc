@@ -189,6 +189,7 @@ static int load_sections_bfd(bfd* bfd_h, Binary* bin)
 
 		sec->binary = bin;
 		sec->name = std::string(secname);
+		sec->type = type;
 		sec->vma = vma;
 		sec->size = size;
 		sec->bytes = (uint8_t*)malloc(size);
