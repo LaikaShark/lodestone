@@ -12,7 +12,9 @@ int main(int argc, char* argv[])
 	Symbol* 		sym;
 	std::string fname;
 	bool 				dig = false;
-	std::string digsection;
+	std::string digsection_name;
+	Section*		digsection;
+	uint64_t*   	b_dig;
 
 	if(argc < 2)
 	{
@@ -22,7 +24,7 @@ int main(int argc, char* argv[])
 	if(argc == 3)
 	{
 		dig = true;
-		digsection.assign(argv[2]);
+		digsection_name.assign(argv[2]);
 	}
 
 	fname.assign(argv[1]);
@@ -44,6 +46,9 @@ int main(int argc, char* argv[])
 						sec->size,
 						sec->name.c_str(),
 						sec->type == Section::SEC_TYPE_CODE ? "CODE":"DATA");
+
+		if(dig && !sec->name.compare(digsection_name))
+			digsection = sec;
 	}
 	if(bin.syms.size() > 0)
 	{
@@ -57,6 +62,24 @@ int main(int argc, char* argv[])
 							(sym->type & Symbol::SYM_TYPE_FNC) ? "FUNC":"");
 		}
 	}
+	if(dig)
+	{
+		printf("Digging into %s:\n\n",digsection->name.c_str());
+		for(i=0; i<digsection->size; i++)
+		{		
+			if(i%16 == 0)
+			{
+				printf("\n");
+			  printf("0x%016jx: ", digsection->vma+i);
+			}
+			else if(i%4 == 0)
+			{
+				printf(" ");
+			}
+			printf("%02x", 0xFF & ((char*)digsection->bytes)[i]);
+		}
+	}
+
 	unload_bin(&bin);
 	return 0;
 }
